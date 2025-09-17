@@ -289,6 +289,16 @@ const run = async () => {
           polymorphismAsDiscriminatedUnions: true,
         };
         break;
+      case "--concurrency": {
+        const concurrency = parseInt(getVal()!, 10);
+        if (isNaN(concurrency) || concurrency < 1) {
+          exitWithError(
+            `Invalid value for --concurrency. Must be a positive integer.`,
+          );
+        }
+        options.concurrency = concurrency;
+        break;
+      }
       default:
         exitWithError(`Unknown option: ${flag}`);
     }
@@ -399,6 +409,9 @@ Run this command inside an Gel project directory or specify the desired target l
     connectionConfig.password = await readPasswordFromStdin();
   }
 
+  // Use concurrency setting or keep original default
+  const concurrency = options.concurrency || 5;
+
   let client: Client;
   try {
     const cxnCreatorFn = options.useHttpClient
@@ -406,7 +419,7 @@ Run this command inside an Gel project directory or specify the desired target l
       : createClient;
     client = cxnCreatorFn({
       ...connectionConfig,
-      concurrency: 5,
+      concurrency,
     });
   } catch (e) {
     exitWithError(`Failed to connect: ${(e as Error).message}`);
@@ -506,6 +519,8 @@ OPTIONS:
         Return the exact string literal for .__type__.name instead of a general string type
     --future-polymorphism-as-discriminated-unions
         Use a discriminated union as the return type for polymorphic queries, where each member includes __typename
+    --concurrency <number>
+        Control the number of queries processed concurrently (default: 5)
 `);
 }
 run();

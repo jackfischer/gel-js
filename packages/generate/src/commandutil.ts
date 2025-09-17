@@ -18,6 +18,7 @@ export interface CommandOptions {
   useHttpClient?: boolean;
   future?: Partial<Record<keyof typeof defaultFutureFlags, boolean>>;
   patterns?: string[];
+  concurrency?: number;
 }
 
 const { input } = systemUtils;
